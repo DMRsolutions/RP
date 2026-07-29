@@ -1,0 +1,1814 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DMR System | Reservas Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:'Segoe UI',Arial,sans-serif;
+}
+
+
+body{
+
+margin:0;
+background:#eef1f5;
+
+}
+
+
+
+header{
+
+background:#111827;
+
+color:white;
+
+padding:25px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+
+
+header h1{
+
+margin:0;
+
+font-size:28px;
+
+}
+
+
+
+.logo{
+
+color:#d4af37;
+
+font-weight:bold;
+
+}
+
+
+
+.container{
+
+max-width:1300px;
+
+margin:auto;
+
+padding:25px;
+
+}
+
+
+
+
+.card{
+
+background:white;
+
+padding:25px;
+
+border-radius:20px;
+
+margin-bottom:25px;
+
+box-shadow:0 8px 25px rgba(0,0,0,.10);
+
+}
+
+
+
+.card h2{
+
+color:#b8860b;
+
+margin-top:0;
+
+}
+
+
+
+
+
+/* DASHBOARD */
+
+
+.dashboard{
+
+display:grid;
+
+grid-template-columns:
+
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+}
+
+
+
+.metric{
+
+background:#111827;
+
+color:white;
+
+padding:25px;
+
+border-radius:18px;
+
+text-align:center;
+
+}
+
+
+
+.metric h3{
+
+font-size:32px;
+
+margin:0;
+
+color:#d4af37;
+
+}
+
+
+
+.metric p{
+
+margin-top:10px;
+
+}
+
+
+
+
+
+/* GRAFICAS */
+
+
+.graficas{
+
+display:grid;
+
+grid-template-columns:
+
+repeat(auto-fit,minmax(350px,1fr));
+
+gap:25px;
+
+}
+
+
+
+canvas{
+
+max-height:350px;
+
+}
+
+
+
+
+
+
+/* FORMULARIOS */
+
+
+select,
+input{
+
+width:100%;
+
+padding:14px;
+
+border-radius:10px;
+
+border:1px solid #ddd;
+
+font-size:16px;
+
+}
+
+
+
+
+button{
+
+padding:14px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+
+
+.btn{
+
+background:#111827;
+
+color:white;
+
+width:100%;
+
+margin-top:15px;
+
+}
+
+
+
+
+
+/* RESERVAS */
+
+
+.reserva{
+
+background:#fafafa;
+
+border-left:5px solid #b8860b;
+
+padding:18px;
+
+border-radius:12px;
+
+margin-top:15px;
+
+}
+
+
+
+.reserva strong{
+
+color:#b8860b;
+
+}
+
+
+
+
+
+.watermark{
+
+text-align:center;
+
+padding:25px;
+
+font-size:13px;
+
+color:#888;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<header>
+
+
+<h1>
+
+🍾 DMR System
+
+</h1>
+
+
+
+<div class="logo">
+
+RESERVAS DASHBOARD
+
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+<div class="container">
+
+
+
+
+
+
+<!-- ======================
+DASHBOARD GENERAL
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+📊 Dashboard General
+
+</h2>
+
+
+
+
+<div class="dashboard">
+
+
+
+<div class="metric">
+
+<h3 id="totalReservas">
+
+0
+
+</h3>
+
+<p>
+
+Reservas
+
+</p>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3 id="totalPersonas">
+
+0
+
+</h3>
+
+<p>
+
+Personas
+
+</p>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3 id="totalConsumo">
+
+$0
+
+</h3>
+
+<p>
+
+Consumo Total
+
+</p>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3 id="totalPago">
+
+$0
+
+</h3>
+
+<p>
+
+Pago RP
+
+</p>
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ======================
+GRAFICAS
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+📈 Gráficas
+
+</h2>
+
+
+
+<div class="graficas">
+
+
+
+<div>
+
+
+<h3>
+
+Consumo por RP
+
+</h3>
+
+
+<canvas id="graficaConsumo"></canvas>
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<h3>
+
+Reservas por RP
+
+</h3>
+
+
+<canvas id="graficaReservas"></canvas>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ======================
+FILTRO RP
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+🔎 Filtro de Reservas
+
+</h2>
+
+
+
+<label>
+
+Seleccionar RP
+
+</label>
+
+
+<select id="filtroRP" onchange="filtrarReservas()">
+
+
+
+<option value="">
+
+Todos los RP
+
+</option>
+
+
+
+</select>
+
+
+
+</div>
+
+<!-- ======================
+RESERVAS REGISTRADAS
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+📋 Reservas Registradas
+
+</h2>
+
+
+
+<div style="overflow-x:auto;">
+
+<table class="tabla-metricas" id="tablaReservas">
+
+<thead>
+<tr>
+<th>Cliente</th>
+<th>RP</th>
+<th>Coordinador</th>
+<th>Mesa</th>
+<th>Mesero</th>
+<th>Consumo</th>
+<th>Comisión</th>
+<th>Acción</th>
+</tr>
+</thead>
+
+<tbody id="cuerpoReservas">
+<tr><td colspan="7">Cargando reservas...</td></tr>
+</tbody>
+
+</table>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- ======================
+RESUMEN PAGOS RP
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+💰 Resumen de Pagos RP
+
+</h2>
+
+
+
+<div id="resumenPagos">
+
+Seleccione un RP para consultar
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- ======================
+REPORTE PDF
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+📄 Generador de Reporte
+
+</h2>
+
+
+<p style="color:#666;font-size:14px;">
+
+El reporte usa el RP seleccionado en el filtro de arriba (o "Todos"). Deja la fecha vacía para incluir todas las fechas.
+
+</p>
+
+
+<label>
+
+Fecha del reporte
+
+</label>
+
+
+
+<input
+
+type="date"
+
+id="fechaReporte"
+
+>
+
+
+
+
+<button class="btn" onclick="generarPDF()">
+
+📑 Generar Reporte PDF
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- ======================
+NAVEGACION
+====================== -->
+
+
+<div class="card">
+
+
+<h2>
+
+⚙️ Opciones
+
+</h2>
+
+
+
+
+<button class="btn" onclick="volverAdmin()">
+
+⬅️ Regresar al Panel Administrador
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="watermark">
+
+
+© 2026 DMR System | Todos los derechos reservados
+
+
+</div>
+<script>
+
+
+// ===============================
+// VARIABLES
+// ===============================
+
+
+let reservas = JSON.parse(
+localStorage.getItem("reservas")
+) || [];
+
+
+
+let rps = JSON.parse(
+localStorage.getItem("rps")
+) || [];
+
+
+
+let metricas = JSON.parse(
+localStorage.getItem("metricas")
+) || {
+
+tarifas: []
+
+};
+
+
+if(!metricas.tarifas){
+
+metricas.tarifas = [];
+
+}
+
+
+
+let graficaConsumo;
+
+let graficaReservas;
+
+
+
+
+// ===============================
+// CALCULAR PAGO RP SEGUN TARIFAS
+// ===============================
+
+
+function calcularPagoRP(consumo){
+
+
+let pago = 0;
+
+
+let ordenadas =
+[...metricas.tarifas].sort((a,b)=>a.consumo-b.consumo);
+
+
+ordenadas.forEach(t=>{
+
+if(consumo >= t.consumo){
+
+pago = t.pago;
+
+}
+
+});
+
+
+return pago;
+
+
+}
+
+
+
+
+
+
+// ===============================
+// INICIO
+// ===============================
+
+
+window.onload = function(){
+
+
+cargarFiltroRP();
+
+
+filtrarReservas();
+
+
+actualizarDashboard();
+
+
+};
+
+
+
+
+
+
+
+// ===============================
+// CARGAR RP EN FILTRO
+// ===============================
+
+
+function cargarFiltroRP(){
+
+
+let filtro = 
+document.getElementById("filtroRP");
+
+
+
+filtro.innerHTML = `
+
+<option value="">
+
+Todos los RP
+
+</option>
+
+`;
+
+
+
+
+rps.forEach(rp=>{
+
+
+let nombre = rp.nombre || rp;
+
+
+
+let opcion = document.createElement("option");
+
+
+
+opcion.value = nombre;
+
+
+opcion.textContent = nombre;
+
+
+
+filtro.appendChild(opcion);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// FILTRAR RESERVAS
+// ===============================
+
+
+function filtrarReservas(){
+
+
+let seleccionado =
+
+document.getElementById("filtroRP").value;
+
+
+
+let listaIndexada =
+
+reservas.map((r,i)=>({...r, _idx:i}));
+
+
+
+let resultado;
+
+
+
+if(seleccionado==""){
+
+
+resultado = listaIndexada;
+
+
+}
+
+else{
+
+
+resultado = listaIndexada.filter(
+
+r => r.rp == seleccionado
+
+);
+
+
+}
+
+
+
+resultado.sort((a,b)=>
+
+String(a.rp).localeCompare(String(b.rp))
+
+);
+
+
+
+mostrarReservas(resultado);
+
+
+mostrarResumen(resultado);
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// MOSTRAR RESERVAS
+// ===============================
+
+
+function mostrarReservas(lista){
+
+
+let cuerpo = document.getElementById("cuerpoReservas");
+
+
+let html = "";
+
+
+
+if(lista.length == 0){
+
+html = `<tr><td colspan="8" style="text-align:center;">No existen reservas</td></tr>`;
+
+cuerpo.innerHTML = html;
+
+return;
+
+}
+
+
+
+lista.forEach(r=>{
+
+
+let consumo = Number(r.consumo || 0);
+
+let comision = calcularPagoRP(consumo);
+
+
+
+html += `
+
+<tr>
+
+<td>${r.nombre}</td>
+
+<td>${r.rp}</td>
+
+<td>${r.coordinador || "-"}</td>
+
+<td>${r.mesa}</td>
+
+<td>${r.mesero || "-"}</td>
+
+<td>
+
+<input
+type="number"
+id="consumoInput${r._idx}"
+value="${consumo}"
+style="width:110px;display:inline-block;">
+
+<button
+class="btn"
+style="width:auto;padding:8px 12px;display:inline-block;margin-top:0;"
+onclick="actualizarConsumo(${r._idx})">
+💾
+</button>
+
+</td>
+
+<td><b>$${comision.toFixed(2)}</b></td>
+
+<td>
+
+<button
+
+class="btn-delete"
+
+style="width:auto;padding:8px 12px;"
+
+onclick="eliminarReserva(${r._idx})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+
+});
+
+
+
+cuerpo.innerHTML = html;
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// RESUMEN DE PAGOS
+// ===============================
+
+
+// ===============================
+// ACTUALIZAR CONSUMO POR RESERVA
+// ===============================
+
+
+function actualizarConsumo(idx){
+
+
+let valor =
+
+Number(document.getElementById("consumoInput"+idx).value) || 0;
+
+
+
+reservas[idx].consumo = valor;
+
+
+
+localStorage.setItem(
+
+"reservas",
+
+JSON.stringify(reservas)
+
+);
+
+
+
+actualizarDashboard();
+
+
+filtrarReservas();
+
+
+alert("Consumo actualizado correctamente");
+
+
+}
+
+
+
+
+// ===============================
+// ELIMINAR RESERVA (CON CONTRASEÑA)
+// ===============================
+
+
+function eliminarReserva(idx){
+
+
+let clave = prompt("Escriba la contraseña de administrador para eliminar esta reserva:");
+
+
+if(clave === null){
+
+return;
+
+}
+
+
+if(clave !== "1234"){
+
+alert("Contraseña incorrecta. No se eliminó la reserva.");
+
+return;
+
+}
+
+
+
+let confirmar = confirm("¿Está seguro de eliminar esta reserva? Esta acción no se puede deshacer.");
+
+
+if(!confirmar){
+
+return;
+
+}
+
+
+
+reservas.splice(idx,1);
+
+
+
+localStorage.setItem(
+
+"reservas",
+
+JSON.stringify(reservas)
+
+);
+
+
+
+actualizarDashboard();
+
+
+filtrarReservas();
+
+
+alert("Reserva eliminada correctamente");
+
+
+}
+
+
+
+
+function mostrarResumen(lista){
+
+
+
+let totalPersonas=0;
+
+let consumoTotal=0;
+
+let pagoTotal=0;
+
+
+
+
+lista.forEach(r=>{
+
+
+totalPersonas +=
+
+Number(r.personas || 0);
+
+
+
+let consumo =
+
+Number(r.consumo || 0);
+
+
+
+consumoTotal += consumo;
+
+
+
+pagoTotal +=
+
+calcularPagoRP(consumo);
+
+
+
+});
+
+
+
+
+
+document.getElementById("resumenPagos").innerHTML = `
+
+
+Reservas:
+
+<b>${lista.length}</b>
+
+
+<br><br>
+
+
+Personas:
+
+<b>${totalPersonas}</b>
+
+
+<br><br>
+
+
+Consumo generado:
+
+<b>$${consumoTotal.toFixed(2)}</b>
+
+
+<br><br>
+
+
+Pago total RP:
+
+<b>$${pagoTotal.toFixed(2)}</b>
+
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// DASHBOARD GENERAL
+// ===============================
+
+
+function actualizarDashboard(){
+
+
+
+let totalPersonas=0;
+
+let totalConsumo=0;
+
+let totalPago=0;
+
+
+
+let consumoRP={};
+
+let reservasRP={};
+
+
+
+
+reservas.forEach(r=>{
+
+
+
+let rp=r.rp;
+
+
+
+let consumo =
+
+Number(r.consumo || 0);
+
+
+
+totalPersonas +=
+
+Number(r.personas || 0);
+
+
+
+totalConsumo += consumo;
+
+
+totalPago += calcularPagoRP(consumo);
+
+
+
+consumoRP[rp] =
+
+(consumoRP[rp] || 0) + consumo;
+
+
+
+reservasRP[rp] =
+
+(reservasRP[rp] || 0) + 1;
+
+
+
+});
+
+
+
+
+document.getElementById("totalReservas").innerHTML =
+
+reservas.length;
+
+
+
+document.getElementById("totalPersonas").innerHTML =
+
+totalPersonas;
+
+
+
+document.getElementById("totalConsumo").innerHTML =
+
+"$" + totalConsumo.toFixed(2);
+
+
+
+document.getElementById("totalPago").innerHTML =
+
+"$" + totalPago.toFixed(2);
+
+
+
+
+crearGraficas(
+
+consumoRP,
+
+reservasRP
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// CREAR GRAFICAS
+// ===============================
+
+
+function crearGraficas(consumos,reservasCantidad){
+
+
+
+let nombres =
+
+Object.keys(consumos);
+
+
+
+let valores =
+
+Object.values(consumos);
+
+
+
+let cantidades =
+
+Object.values(reservasCantidad);
+
+
+
+
+
+if(graficaConsumo)
+
+graficaConsumo.destroy();
+
+
+
+
+
+graficaConsumo = new Chart(
+
+document.getElementById("graficaConsumo"),
+
+{
+
+
+type:"bar",
+
+
+data:{
+
+
+labels:nombres,
+
+
+datasets:[{
+
+
+label:"Consumo por RP",
+
+
+data:valores
+
+
+}]
+
+
+}
+
+
+}
+
+);
+
+
+
+
+
+
+
+if(graficaReservas)
+
+graficaReservas.destroy();
+
+
+
+
+
+
+graficaReservas = new Chart(
+
+document.getElementById("graficaReservas"),
+
+{
+
+
+type:"pie",
+
+
+data:{
+
+
+labels:nombres,
+
+
+datasets:[{
+
+
+label:"Reservas",
+
+
+data:cantidades
+
+
+}]
+
+
+}
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// REPORTE PDF
+// ===============================
+
+
+function generarPDF(){
+
+
+let fechaFiltro =
+document.getElementById("fechaReporte").value;
+
+
+let rpFiltro =
+document.getElementById("filtroRP").value;
+
+
+
+let datos = reservas.filter(r=>{
+
+let pasaFecha =
+fechaFiltro=="" || r.fecha==fechaFiltro;
+
+let pasaRP =
+rpFiltro=="" || r.rp==rpFiltro;
+
+return pasaFecha && pasaRP;
+
+});
+
+
+datos.sort((a,b)=>
+
+String(a.rp).localeCompare(String(b.rp))
+
+);
+
+
+
+if(datos.length==0){
+
+alert("No hay reservas que coincidan con el filtro seleccionado");
+
+return;
+
+}
+
+
+
+let totalPersonas=0;
+
+let totalConsumo=0;
+
+let totalPago=0;
+
+
+
+let doc = new jspdf.jsPDF();
+
+
+
+// ===============================
+// PORTADA / RESUMEN GENERAL
+// ===============================
+
+
+doc.setFontSize(16);
+
+doc.text("DMR System - Reporte de Reservas",14,15);
+
+
+
+doc.setFontSize(10);
+
+doc.text("Fecha filtrada: " + (fechaFiltro || "Todas"),14,23);
+
+doc.text("RP filtrado: " + (rpFiltro || "Todos"),14,29);
+
+
+
+doc.setFontSize(13);
+
+doc.text("Métricas Generales (todas las reservas)",14,42);
+
+
+
+doc.setFontSize(10);
+
+doc.text("Total de reservas: " + reservas.length,14,50);
+
+doc.text("Total de personas: " + document.getElementById("totalPersonas").innerText,14,56);
+
+doc.text("Consumo total: " + document.getElementById("totalConsumo").innerText,14,62);
+
+doc.text("Pago total RP: " + document.getElementById("totalPago").innerText,14,68);
+
+
+
+
+// ===============================
+// GRAFICAS
+// ===============================
+
+
+try{
+
+let imgConsumo =
+document.getElementById("graficaConsumo").toDataURL("image/png",1.0);
+
+doc.text("Consumo por RP",14,82);
+
+doc.addImage(imgConsumo,"PNG",14,86,85,65);
+
+
+
+let imgReservas =
+document.getElementById("graficaReservas").toDataURL("image/png",1.0);
+
+doc.text("Reservas por RP",108,82);
+
+doc.addImage(imgReservas,"PNG",108,86,85,65);
+
+
+}catch(e){
+
+doc.text("(No se pudieron incluir las gráficas)",14,82);
+
+}
+
+
+
+
+// ===============================
+// TABLA DETALLADA (SEGUN FILTRO)
+// ===============================
+
+
+doc.addPage();
+
+
+doc.setFontSize(13);
+
+doc.text("Detalle de Reservas Filtradas",14,15);
+
+
+
+let y = 28;
+
+
+
+doc.setFontSize(9);
+
+doc.text("Cliente",14,y);
+
+doc.text("RP",42,y);
+
+doc.text("Coordinador",62,y);
+
+doc.text("Mesa",90,y);
+
+doc.text("Mesero",102,y);
+
+doc.text("Consumo",130,y);
+
+doc.text("Comisión",160,y);
+
+
+
+y += 5;
+
+
+
+doc.setLineWidth(0.3);
+
+doc.line(14,y,196,y);
+
+y += 6;
+
+
+
+doc.setFontSize(8);
+
+
+datos.forEach(r=>{
+
+
+let consumo = Number(r.consumo || 0);
+
+let comision = calcularPagoRP(consumo);
+
+
+
+totalPersonas += Number(r.personas || 0);
+
+totalConsumo += consumo;
+
+totalPago += comision;
+
+
+
+if(y > 280){
+
+doc.addPage();
+
+y = 20;
+
+}
+
+
+
+doc.text(String(r.nombre || "").substring(0,16),14,y);
+
+doc.text(String(r.rp || "").substring(0,12),42,y);
+
+doc.text(String(r.coordinador || "-").substring(0,14),62,y);
+
+doc.text(String(r.mesa || ""),90,y);
+
+doc.text(String(r.mesero || "-").substring(0,14),102,y);
+
+doc.text("$"+consumo.toFixed(2),130,y);
+
+doc.text("$"+comision.toFixed(2),160,y);
+
+
+
+y += 6;
+
+
+});
+
+
+
+y += 6;
+
+doc.setLineWidth(0.3);
+
+doc.line(14,y,196,y);
+
+y += 8;
+
+
+
+doc.setFontSize(11);
+
+doc.text("Reservas filtradas: " + datos.length,14,y); y += 6;
+
+doc.text("Personas (filtro): " + totalPersonas,14,y); y += 6;
+
+doc.text("Consumo (filtro): $" + totalConsumo.toFixed(2),14,y); y += 6;
+
+doc.text("Pago RP (filtro): $" + totalPago.toFixed(2),14,y);
+
+
+
+let nombreArchivo =
+"reporte-reservas-" + (rpFiltro || "todos") + "-" + (fechaFiltro || "todas") + ".pdf";
+
+
+
+doc.save(nombreArchivo);
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// REGRESAR ADMIN
+// ===============================
+
+
+function volverAdmin(){
+
+
+window.location.href =
+
+"admin.html";
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>
