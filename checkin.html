@@ -1,0 +1,685 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RP Manager | Check-in</title>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+
+<script>
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyCacwnVu4uWOXPMsES4UyjpTP-xl9-HA9E",
+
+authDomain: "dmr-rp-manager.firebaseapp.com",
+
+projectId: "dmr-rp-manager",
+
+storageBucket: "dmr-rp-manager.firebasestorage.app",
+
+messagingSenderId: "453849338735",
+
+appId: "1:453849338735:web:6756c416e057b65dba8e9a"
+
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+</script>
+
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:'Segoe UI',Arial,sans-serif;
+}
+
+body{
+
+margin:0;
+background:#f4f4f4;
+
+}
+
+header{
+
+background:#111;
+color:white;
+padding:20px;
+text-align:center;
+
+}
+
+header h1{
+
+margin:0;
+font-size:22px;
+
+}
+
+.sub{
+
+color:#b8860b;
+font-size:13px;
+margin-top:5px;
+
+}
+
+.container{
+
+max-width:480px;
+margin:20px auto;
+padding:0 15px 30px 15px;
+
+}
+
+.card{
+
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 5px 20px #0002;
+margin-bottom:15px;
+
+}
+
+h2{
+
+color:#b8860b;
+margin-top:0;
+font-size:18px;
+
+}
+
+#lector{
+
+width:100%;
+border-radius:14px;
+overflow:hidden;
+
+}
+
+button{
+
+width:100%;
+padding:16px;
+border:none;
+border-radius:12px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+margin-top:12px;
+
+}
+
+.btn-primario{
+
+background:#b8860b;
+color:white;
+
+}
+
+.btn-secundario{
+
+background:#222;
+color:white;
+
+}
+
+.resultado{
+
+display:none;
+
+}
+
+.dato{
+
+font-size:16px;
+margin:6px 0;
+
+}
+
+.dato b{
+
+color:#b8860b;
+
+}
+
+.badge-mesa{
+
+display:inline-block;
+background:#b8860b;
+color:white;
+font-size:28px;
+font-weight:bold;
+padding:12px 25px;
+border-radius:14px;
+margin:15px 0;
+
+}
+
+.grid-mesas{
+
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-top:10px;
+
+}
+
+.mesa-btn{
+
+padding:16px 0;
+border-radius:10px;
+border:2px solid #ddd;
+background:#e8f8ec;
+color:#1a3d1a;
+font-weight:bold;
+cursor:pointer;
+margin-top:0;
+
+}
+
+.mesa-btn.ocupada{
+
+background:#fdecea;
+color:#c0392b;
+border-color:#f3c6c1;
+cursor:not-allowed;
+
+}
+
+.mensaje-estado{
+
+text-align:center;
+padding:12px;
+border-radius:10px;
+font-weight:bold;
+margin-top:10px;
+display:none;
+
+}
+
+.mensaje-ok{
+
+background:#e8f8ec;
+color:#1a3d1a;
+
+}
+
+.mensaje-error{
+
+background:#fdecea;
+color:#c0392b;
+
+}
+
+.watermark{
+
+text-align:center;
+color:#aaa;
+font-size:11px;
+padding:10px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>🚪 RP MANAGER — Check-in</h1>
+
+<div class="sub">Escanea el QR del cliente en la entrada</div>
+
+</header>
+
+
+<div class="container">
+
+
+<div class="card" id="cardLector">
+
+<h2>📷 Escanear Código QR</h2>
+
+<div id="lector"></div>
+
+<div class="mensaje-estado" id="mensajeEstado"></div>
+
+</div>
+
+
+<div class="card resultado" id="cardResultado">
+
+<h2>Datos de la Reserva</h2>
+
+<div class="dato"><b>Cliente:</b> <span id="rCliente"></span></div>
+<div class="dato"><b>Personas:</b> <span id="rPersonas"></span></div>
+<div class="dato"><b>Fecha:</b> <span id="rFecha"></span></div>
+<div class="dato"><b>RP:</b> <span id="rRP"></span></div>
+
+
+<div id="bloqueMesaAsignada" style="display:none;text-align:center;">
+
+<p>Mesa asignada:</p>
+
+<div class="badge-mesa" id="numeroMesaAsignada"></div>
+
+<button class="btn-primario" onclick="confirmarLlegada()">
+
+✅ Confirmar Llegada
+
+</button>
+
+</div>
+
+
+<div id="bloqueSinMesa" style="display:none;">
+
+<p>Esta reserva aún no tiene mesa asignada. Selecciona una mesa libre:</p>
+
+<div class="grid-mesas" id="gridMesasDisponibles"></div>
+
+</div>
+
+
+<button class="btn-secundario" onclick="reiniciarLector()">
+
+🔄 Escanear Otra Reserva
+
+</button>
+
+</div>
+
+
+<div class="watermark">RP Manager — DMR System</div>
+
+
+</div>
+
+
+<script>
+
+
+let reservaActual = null;
+
+let idReservaActual = null;
+
+let lector = null;
+
+
+
+
+function iniciarLector(){
+
+
+lector = new Html5Qrcode("lector");
+
+
+lector.start(
+
+{ facingMode:"environment" },
+
+{ fps:10, qrbox:230 },
+
+onEscaneoExitoso,
+
+function(errorEscaneo){}
+
+).catch(function(err){
+
+document.getElementById("mensajeEstado").className = "mensaje-estado mensaje-error";
+
+document.getElementById("mensajeEstado").style.display = "block";
+
+document.getElementById("mensajeEstado").innerText =
+
+"No se pudo activar la cámara. Da permiso de cámara al navegador e intenta de nuevo.";
+
+});
+
+
+}
+
+
+
+
+function onEscaneoExitoso(textoDecodificado){
+
+
+if(!textoDecodificado.startsWith("DMR-RESERVA:")){
+
+return;
+
+}
+
+
+let idReserva = textoDecodificado.replace("DMR-RESERVA:","");
+
+
+lector.pause(true);
+
+
+buscarReserva(idReserva);
+
+
+}
+
+
+
+
+function buscarReserva(idReserva){
+
+
+db.collection("reservas").doc(idReserva).get().then(function(doc){
+
+
+if(!doc.exists){
+
+mostrarMensajeEstado("Este código QR no corresponde a ninguna reserva.", true);
+
+setTimeout(reanudarLector, 2000);
+
+return;
+
+}
+
+
+reservaActual = doc.data();
+
+idReservaActual = idReserva;
+
+
+mostrarResultado();
+
+
+}).catch(function(e){
+
+mostrarMensajeEstado("Error al buscar la reserva. Verifica tu conexión.", true);
+
+setTimeout(reanudarLector, 2000);
+
+});
+
+
+}
+
+
+
+
+function mostrarMensajeEstado(texto, esError){
+
+
+let el = document.getElementById("mensajeEstado");
+
+el.className = "mensaje-estado " + (esError ? "mensaje-error" : "mensaje-ok");
+
+el.style.display = "block";
+
+el.innerText = texto;
+
+
+setTimeout(()=>{ el.style.display="none"; }, 3000);
+
+
+}
+
+
+
+
+function mostrarResultado(){
+
+
+document.getElementById("cardLector").style.display = "none";
+
+document.getElementById("cardResultado").style.display = "block";
+
+
+document.getElementById("rCliente").innerText = reservaActual.nombre;
+
+document.getElementById("rPersonas").innerText = reservaActual.personas;
+
+document.getElementById("rFecha").innerText = reservaActual.fecha;
+
+document.getElementById("rRP").innerText = reservaActual.rp;
+
+
+if(reservaActual.estadoCheckin == "llegó"){
+
+mostrarMensajeEstado("Esta reserva ya había hecho check-in anteriormente.", false);
+
+}
+
+
+if(reservaActual.mesa && reservaActual.mesa!=""){
+
+
+document.getElementById("bloqueMesaAsignada").style.display = "block";
+
+document.getElementById("bloqueSinMesa").style.display = "none";
+
+document.getElementById("numeroMesaAsignada").innerText = "Mesa " + reservaActual.mesa;
+
+
+}else{
+
+
+document.getElementById("bloqueMesaAsignada").style.display = "none";
+
+document.getElementById("bloqueSinMesa").style.display = "block";
+
+cargarMesasDisponibles();
+
+
+}
+
+
+}
+
+
+
+
+function cargarMesasDisponibles(){
+
+
+let contenedor = document.getElementById("gridMesasDisponibles");
+
+contenedor.innerHTML = "Cargando mesas...";
+
+
+db.collection("mesas").orderBy("numero").get().then(function(snapshot){
+
+
+if(snapshot.empty){
+
+contenedor.innerHTML =
+"<p style='grid-column:1/-1;color:#c0392b;'>No hay mesas configuradas. Pide al administrador que las genere desde el panel de administración.</p>";
+
+return;
+
+}
+
+
+contenedor.innerHTML = "";
+
+
+snapshot.docs.forEach(doc=>{
+
+
+let mesa = doc.data();
+
+let boton = document.createElement("button");
+
+
+boton.className = "mesa-btn" + (mesa.estado=="ocupada" ? " ocupada" : "");
+
+boton.innerText = mesa.numero;
+
+boton.disabled = (mesa.estado=="ocupada");
+
+
+boton.onclick = function(){
+
+asignarMesaYConfirmar(mesa.numero);
+
+};
+
+
+contenedor.appendChild(boton);
+
+
+});
+
+
+}).catch(function(e){
+
+contenedor.innerHTML = "<p style='grid-column:1/-1;color:#c0392b;'>Error al cargar las mesas.</p>";
+
+});
+
+
+}
+
+
+
+
+function asignarMesaYConfirmar(numeroMesa){
+
+
+db.collection("reservas").doc(idReservaActual).update({
+
+mesa:numeroMesa
+
+}).then(function(){
+
+
+reservaActual.mesa = numeroMesa;
+
+marcarMesaOcupada(numeroMesa);
+
+
+});
+
+
+}
+
+
+
+
+function confirmarLlegada(){
+
+
+marcarMesaOcupada(reservaActual.mesa);
+
+
+}
+
+
+
+
+function marcarMesaOcupada(numeroMesa){
+
+
+db.collection("mesas").doc(String(numeroMesa)).set({
+
+numero:numeroMesa,
+
+estado:"ocupada",
+
+reservaId:idReservaActual,
+
+cliente:reservaActual.nombre
+
+},{merge:true}).then(function(){
+
+
+db.collection("reservas").doc(idReservaActual).update({
+
+estadoCheckin:"llegó",
+
+horaLlegada:new Date().toLocaleString()
+
+}).then(function(){
+
+
+mostrarMensajeEstado("✅ Check-in confirmado. Mesa " + numeroMesa + " asignada a " + reservaActual.nombre + ".", false);
+
+
+setTimeout(reiniciarLector, 2500);
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+function reanudarLector(){
+
+
+if(lector){
+
+lector.resume();
+
+}
+
+
+}
+
+
+
+
+function reiniciarLector(){
+
+
+document.getElementById("cardResultado").style.display = "none";
+
+document.getElementById("cardLector").style.display = "block";
+
+
+reservaActual = null;
+
+idReservaActual = null;
+
+
+reanudarLector();
+
+
+}
+
+
+
+
+iniciarLector();
+
+
+</script>
+
+
+</body>
+
+</html>
